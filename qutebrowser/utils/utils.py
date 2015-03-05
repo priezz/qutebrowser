@@ -316,11 +316,6 @@ def keyevent_to_string(e):
         (Qt.MetaModifier, 'Meta'),
         (Qt.ShiftModifier, 'Shift'),
     ])
-    if sys.platform == 'darwin':
-        # FIXME verify this feels right on a real Mac as well.
-        # In my Virtualbox VM, the Ctrl key shows up as meta.
-        # https://github.com/The-Compiler/qutebrowser/issues/110
-        modmask2str[Qt.MetaModifier] = 'Ctrl'
     modifiers = (Qt.Key_Control, Qt.Key_Alt, Qt.Key_Shift, Qt.Key_Meta,
                  Qt.Key_AltGr, Qt.Key_Super_L, Qt.Key_Super_R,
                  Qt.Key_Hyper_L, Qt.Key_Hyper_R, Qt.Key_Direction_L,
