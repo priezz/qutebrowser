@@ -71,28 +71,22 @@ MAPPINGS = {
     'fonts': {
         'web-family-standard':
             (MapType.setter, lambda qws, v:
-             qws.setFontFamily(QWebSettings.StandardFont, v),
-             ""),
+             qws.setFontFamily(QWebSettings.StandardFont, v)),
         'web-family-fixed':
             (MapType.setter, lambda qws, v:
-             qws.setFontFamily(QWebSettings.FixedFont, v),
-             ""),
+             qws.setFontFamily(QWebSettings.FixedFont, v)),
         'web-family-serif':
             (MapType.setter, lambda qws, v:
-             qws.setFontFamily(QWebSettings.SerifFont, v),
-             ""),
+             qws.setFontFamily(QWebSettings.SerifFont, v)),
         'web-family-sans-serif':
             (MapType.setter, lambda qws, v:
-             qws.setFontFamily(QWebSettings.SansSerifFont, v),
-             ""),
+             qws.setFontFamily(QWebSettings.SansSerifFont, v)),
         'web-family-cursive':
             (MapType.setter, lambda qws, v:
-             qws.setFontFamily(QWebSettings.CursiveFont, v),
-             ""),
+             qws.setFontFamily(QWebSettings.CursiveFont, v)),
         'web-family-fantasy':
             (MapType.setter, lambda qws, v:
-             qws.setFontFamily(QWebSettings.FantasyFont, v),
-             ""),
+             qws.setFontFamily(QWebSettings.FantasyFont, v)),
         'web-size-minimum':
             (MapType.setter, lambda qws, v:
              qws.setFontSize(QWebSettings.MinimumFontSize, v)),
