@@ -72,27 +72,6 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_dev_packages(short=False):
-    """Get a list of packages to install.
-
-    Args:
-        short: Remove the version specification.
-    """
-    packages = ['colorlog', 'flake8', 'astroid', 'pylint', 'pep257',
-                'colorama', 'beautifulsoup4', 'coverage', 'pyroma',
-                'check-manifest']
-    if short:
-        packages = [re.split(r'[<>=]', p)[0] for p in packages]
-    return packages
-
-
-def install_dev_packages():
-    """Install the packages needed for development."""
-    for pkg in get_dev_packages():
-        utils.print_subtitle("Installing {}".format(pkg))
-        venv_python('-m', 'pip', 'install', '--upgrade', pkg)
-
-
 def venv_python(*args, output=False):
     """Call the venv's python with the given arguments."""
     subdir = 'Scripts' if os.name == 'nt' else 'bin'
@@ -113,14 +92,7 @@ def test_toolchain():
     utils.print_title("Checking toolchain")
 
     packages = ['sip', 'PyQt5.QtCore', 'PyQt5.QtWebKit', 'qutebrowser.app']
-    renames = {'beautifulsoup4': 'bs4', 'check-manifest': 'check_manifest'}
-    if g_args.dev:
-        packages += get_dev_packages(short=True)
     for pkg in packages:
-        try:
-            pkg = renames[pkg]
-        except KeyError:
-            pass
         print("Importing {}".format(pkg))
         venv_python('-c', 'import {}'.format(pkg))
 
@@ -274,12 +246,14 @@ def main():
     if not restored:
         create_venv()
 
+    if g_args.dev:
+        utils.print_title("Installing developer packages")
+        venv_python('-m', 'pip', 'install', '--upgrade', '-r',
+                    'requirements-dev.txt')
+
     utils.print_title("Calling: setup.py develop")
     venv_python('setup.py', 'develop')
 
-    if g_args.dev:
-        utils.print_title("Installing developer packages")
-        install_dev_packages()
     link_pyqt()
     test_toolchain()
     save_cache(cache_path)
