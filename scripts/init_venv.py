@@ -23,12 +23,10 @@
 import os
 import re
 import sys
-import glob
 import os.path
 import shutil
 import argparse
 import subprocess
-import distutils.sysconfig  # pylint: disable=import-error
 # see https://bitbucket.org/logilab/pylint/issue/73/
 import venv
 import urllib.request
@@ -37,7 +35,7 @@ import tempfile
 from PyQt5.QtCore import QStandardPaths
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir))
-from scripts import utils
+from scripts import utils, link_pyqt
 
 
 try:
@@ -97,66 +95,17 @@ def test_toolchain():
         venv_python('-c', 'import {}'.format(pkg))
 
 
-def verbose_copy(src, dst, *, follow_symlinks=True):
-    """Copy function for shutil.copytree which prints copied files."""
-    print('{} -> {}'.format(src, dst))
-    shutil.copy(src, dst, follow_symlinks=follow_symlinks)
-
-
-def get_ignored_files(directory, files):
-    """Get the files which should be ignored for link_pyqt() on Windows."""
-    needed_exts = ('.py', '.dll', '.pyd', '.so')
-    ignored_dirs = ('examples', 'qml', 'uic', 'doc')
-    filtered = []
-    for f in files:
-        ext = os.path.splitext(f)[1]
-        full_path = os.path.join(directory, f)
-        if os.path.isdir(full_path) and f in ignored_dirs:
-            filtered.append(f)
-        elif (ext not in needed_exts) and os.path.isfile(full_path):
-            filtered.append(f)
-    return filtered
-
-
-def link_pyqt():
-    """Symlink the systemwide PyQt/sip into the venv."""
+def link():
     action = "Copying" if os.name == 'nt' else "Softlinking"
     utils.print_title("{} PyQt5".format(action))
-    sys_path = distutils.sysconfig.get_python_lib()
     venv_path = venv_python(
         '-c', 'from distutils.sysconfig import get_python_lib\n'
               'print(get_python_lib())', output=True).rstrip()
-
-    globbed_sip = (glob.glob(os.path.join(sys_path, 'sip*.so')) +
-                   glob.glob(os.path.join(sys_path, 'sip*.pyd')))
-    if not globbed_sip:
-        print("Did not find sip in {}!".format(sys_path), file=sys.stderr)
+    try:
+        link_pyqt.link_pyqt(venv_path)
+    except link_pyqt.Error as e:
+        print(str(e), file=sys.stderr)
         sys.exit(1)
-
-    files = [
-        'PyQt5',
-    ]
-    files += [os.path.basename(e) for e in globbed_sip]
-    for fn in files:
-        source = os.path.join(sys_path, fn)
-        dest = os.path.join(venv_path, fn)
-        if not os.path.exists(source):
-            raise FileNotFoundError(source)
-        if os.path.exists(dest):
-            if os.path.isdir(dest) and not os.path.islink(dest):
-                shutil.rmtree(dest)
-            else:
-                os.unlink(dest)
-        if os.name == 'nt':
-            if os.path.isdir(source):
-                shutil.copytree(source, dest, ignore=get_ignored_files,
-                                copy_function=verbose_copy)
-            else:
-                print('{} -> {}'.format(source, dest))
-                shutil.copy(source, dest)
-        else:
-            print('{} -> {}'.format(source, dest))
-            os.symlink(source, dest)
 
 
 def install_pip():
@@ -254,7 +203,7 @@ def main():
     utils.print_title("Calling: setup.py develop")
     venv_python('setup.py', 'develop')
 
-    link_pyqt()
+    link()
     test_toolchain()
     save_cache(cache_path)
 
