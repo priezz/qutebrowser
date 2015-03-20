@@ -123,7 +123,32 @@ installed to compile PyQt5 in a later step.
 
 ----
 $ brew install python3 pyqt5
-$ pip3.4 install qutebrowser
+$ pip3.4 install PyYAML
+$ git clone https://github.com/The-Compiler/qutebrowser.git /tmp/QuteBrowser.app/Contents/MacOS/package
+$ mkdir -p /tmp/QuteBrowser.app/Contents/MacOS
+$ mkdir -p /tmp/QuteBrowser.app/Contents/Resources
+$ echo -e "#\!/bin/sh\npython3 \"\`dirname \\\"\$0\\\"\`/package/qutebrowser.py\"\n" >/tmp/QuteBrowser.app/Contents/MacOS/QuteBrowser
+$ chmod +x /tmp/QuteBrowser.app/Contents/MacOS/QuteBrowser
+$ echo "APPLQTBR" > /tmp/QuteBrowser.app/Contents/PkgInfo
+$ cat > /tmp/QuteBrowser.app/Contents/Info.plist <<- EOM
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>CFBundleExecutable</key><string>QuteBrowser</string>
+<key>CFBundleGetInfoString</key><string>QuteBrowser</string>
+<key>CFBundleIconFile</key><string>icon</string>
+<key>CFBundleIdentifier</key><string>com.QuteBrowser</string>
+<key>CFBundleInfoDictionaryVersion</key><string>6.0</string>
+<key>CFBundleName</key><string>QuteBrowser</string>
+<key>CFBundlePackageType</key><string>APPL</string>
+<key>CFBundleShortVersionString</key><string>1.1.0</string>
+<key>CFBundleSignature</key><string>QTBR</string>
+<key>CFBundleVersion</key><string>0.0.1.20070616</string>
+<key>NSAppleScriptEnabled</key><true/>
+</dict></plist>
+EOM
+$ cp /Applications/Safari.app/Contents/Resources/compass.icns /tmp/QuteBrowser.app/Contents/Resources/icon.icns
+$ mv /tmp//QuteBrowser.app /Applications/
 ----
 
 if you are using Homebrew. For MacPorts, run:
